@@ -1,7 +1,7 @@
 class Observable:
 
     def __init__(self):
-        self.observer = []
+        self.observers = []
 
 
     def addObserver(self, observer):
@@ -15,6 +15,7 @@ class Observable:
     def removeAllObserver(self, observer):
         self.observers = []
 
-    def update(self):
+    def update(self, observed):
         for observer in self.observers:
-            observer.update()
+            observer.update(observed)
+

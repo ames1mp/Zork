@@ -7,12 +7,12 @@ class Player:
     def __init__(self):
         random.seed()
         self.health = random.randrange(100, 126)
-        self.attachPower = random.randrange(10, 21)
+        self.attackPower = random.randrange(10, 21)
         self.inventory = [None] * 10
         self.inventory[0] = Weapon.factory("hersheykiss")
         for i in range(1,9):
             random.seed()
-            rand = random.randrange(1,4)
+            rand = random.randrange(1, 4)
             print(repr(rand))
             if rand == 1:
                 self.inventory[i] = Weapon.factory("sourstraw")
@@ -22,8 +22,8 @@ class Player:
                 self.inventory[i] = Weapon.factory("nerdbomb")
 
     def attack(self, weapon):
-        attackData = {"playerBaseAttackPower": self.attachPower,
-                      "playerModifiedAttackPower": self.attachPower * weapon.attackMod,
+        attackData = {"playerBaseAttackPower": self.attackPower,
+                      "playerModifiedAttackPower": self.attackPower * weapon.attackMod,
                       "weaponType": weapon.type}
         return attackData
 

@@ -1,17 +1,18 @@
 import random
+from observable import Observable
 from enum import Enum
 # Factory code adapted from: http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Factory.html
 
 
 class MonsterTypes(Enum):
-    person = 1
-    zombie = 2
-    vampire = 3
-    ghoul = 4
-    werewolf = 5
+    person = 0
+    zombie = 1
+    vampire = 2
+    ghoul = 3
+    werewolf = 4
 
 
-class Mob(object):
+class Mob(Observable):
 
     def factory(type):
         if type == "person": return Person()
@@ -26,6 +27,8 @@ class Mob(object):
         return self.attackPower
 
     def defend(self, attackData):
+        if self.type == "person":
+            return
         if attackData["weaponType"] == self.immunity[0]:
             return
         if len(self.immunity) == 2 and attackData["weaponType"] == self.immunity[1]:
@@ -41,12 +44,12 @@ class Mob(object):
         self.health = self.health - damage
 
         if self.health <= 0:
-            return "dead"
-        return "alive"
+            super().update(self)
 
 
 class Person(Mob):
     def __init__(self):
+        super().__init__()
         self.type = "person"
         self.health = 100
         self.attackPower = -1
@@ -56,6 +59,7 @@ class Person(Mob):
 
 class Zombie(Mob):
     def __init__(self):
+        super().__init__()
         self.type = "zombie"
         random.seed()
         self.health = random.randrange(50,101)
@@ -66,7 +70,8 @@ class Zombie(Mob):
 
 class Vampire(Mob):
     def __init__(self):
-        self.type = "Vampire"
+        super().__init__()
+        self.type = "vampire"
         random.seed()
         self.health = random.randrange(100,201)
         self.attackPower = random.randrange(10,21)
@@ -76,6 +81,7 @@ class Vampire(Mob):
 
 class Ghoul(Mob):
     def __init__(self):
+        super().__init__()
         self.type = "ghoul"
         random.seed()
         self.health = random.randrange(40,81)
@@ -86,9 +92,10 @@ class Ghoul(Mob):
 
 class Werewolf(Mob):
     def __init__(self):
+        super().__init__()
         self.type = "werewolf"
         random.seed()
         self.health = 200
-        self.attackPower = random.randrange(0,41)
+        self.attackPower = random.randrange(0, 41)
         self.weakness = "none"
         self.immunity = ["ChocolateBar", "SourStraw"]
