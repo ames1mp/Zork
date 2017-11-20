@@ -1,9 +1,20 @@
+########################################################################
+# @author Mike Ames
+# @author Phil Garza
+########################################################################
 import random
 
 # Factory code adapted from: http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Factory.html
 
-
+########################################################################
+# Weapon Class. The parent class for weapons.
+########################################################################
 class Weapon(object):
+
+    ########################################################################
+    # Factory method which generates a weapon based on the type provided.
+    # @return a weapon object.
+    ########################################################################
     def factory(weaponType):
         if weaponType == "hersheykiss": return HersheyKiss()
         if weaponType == "sourstraw": return SourStraw()
@@ -12,7 +23,10 @@ class Weapon(object):
         assert 0, "Invalid type: " + weaponType
     factory = staticmethod(factory)
 
-
+########################################################################
+# Weapon classes. The child classes of Weapon. Sets the weapons' type
+# attack modifier and number of uses
+########################################################################
 class HersheyKiss(Weapon):
     def __init__(self):
         self.type = "HersheyKiss"

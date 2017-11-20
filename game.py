@@ -1,8 +1,19 @@
+########################################################################
+# @author Mike Ames
+# @author Phil Garza
+########################################################################
 from world import World
 import pygame
 
+########################################################################
+#Game class. The GUI representation of the game's state.
+########################################################################
 class Game:
 
+    ####################################################################
+    # Constructor. Sets up PyGame, the window, loads assets, defines
+    # constants.
+    ####################################################################
     def __init__(self):
         self.world = World()
 
@@ -50,6 +61,9 @@ class Game:
         self.gameOver = False
 
     # game loop structure adapted from a video series: https://youtu.be/PzG-fnci8uE
+    ########################################################################
+    # Run method. The main game loop. Updates the game's state and view.
+    ########################################################################
     def run(self):
         gameExit = False
         FPS = 13
@@ -189,7 +203,6 @@ class Game:
                             self.battleRound(self.world.player.inventory[9])
                             battleRoundOngoing == True
 
-
                 self.gameDisplay.fill(self.black)
                 self.gameDisplay.blit(self.battleBG, (0, 200))
                 self.gameDisplay.fill(self.white, rect=[650, 700, 10, 250])
@@ -206,23 +219,36 @@ class Game:
 
     pygame.quit()
 
-
+    ########################################################################
+    # Prints text to the screen. Take a message, and font color, and
+    # coordinates to print the text at.
+    ########################################################################
     # adapted from https://youtu.be/PzG-fnci8uE
     def printToScreen(self, msg, color, x, y):
         text = self.font.render(msg, True, color)
         self.gameDisplay.blit(text, (x, y))
 
+    ########################################################################
+    # Prints the number of monsters in the neighborhood to the screen.
+    ########################################################################
     def printNumMonsters(self):
         numMonsters = self.world.neighborhood.numMonsters
         msg = repr(numMonsters) + " monsters remaining"
         self.printToScreen(msg, self.red, 1400, 10)
 
+    ########################################################################
+    # A sprite store. Loads images and saves them to a dictionary. Returns
+    # images if the have already been loaded.
+    ########################################################################
     # from https://stackoverflow.com/questions/17615447/pre-loading-images-pygame
     def getImage(self, key):
         if key not in self.spriteStore:
             self.spriteStore[key] = pygame.image.load(key)
         return self.spriteStore[key]
 
+    ########################################################################
+    # Updates a record of the player's location on the world map screen.
+    ########################################################################
     def updateLoc(self, playerDirection, playerX, playerY):
         if playerDirection == "e" or playerDirection == "w":
             if  playerX > 0 and playerX < self.colLen:
@@ -236,7 +262,6 @@ class Game:
             elif playerX > self.colLen*4 and playerX < self.colLen * 5:
                 self.playerGridCol = 4
 
-
         elif playerDirection == "n" or playerDirection == "s":
             if  playerY > 0 and playerY < self.rowLen:
                 self.playerGridRow = 0
@@ -247,6 +272,9 @@ class Game:
             elif playerY > self.rowLen*3 and playerY < self.rowLen * 4:
                 self.playerGridRow = 3
 
+    ########################################################################
+    # Prints text to the screen displaying the number of monsters in a house.
+    ########################################################################
     def printHomeInfo(self, playerX, playerY):
         msg = ""
         color = (0, 0, 0)
@@ -262,6 +290,9 @@ class Game:
         y = playerY - 50
         self.printToScreen(msg, color, x, y)
 
+    ########################################################################
+    # Renders monsters to the battle screen.
+    ########################################################################
     def showMonsters(self):
         monsters = self.currentHouse.monsters
         monsterSpacing = 120
@@ -281,6 +312,9 @@ class Game:
                 self.gameDisplay.blit(self.person, (monsterX, monsterY))
             monsterX += monsterSpacing
 
+    ########################################################################
+    # Prints a list of the player's weapons to the screen
+    ########################################################################
     def printItems(self):
         x = 20
         y = 20
@@ -298,7 +332,9 @@ class Game:
                 x = 20
                 y += ySpacing
 
-
+    ########################################################################
+    # Executes the battle logic and updates the view accordingly.
+    ########################################################################
     def battleRound(self, weapon):
         displayBattleText = True
         battleText = []

@@ -1,9 +1,18 @@
+########################################################################
+# @author Mike Ames
+# @author Phil Garza
+########################################################################
+
 import random
 from observable import Observable
 from enum import Enum
-# Factory code adapted from: http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Factory.html
+# Factory code adapted from:
+# http://python-3-patterns-idioms-test.readthedocs.io
+# /en/latest/Factory.html
 
-
+########################################################################
+# An enum class which defines the types of monsters.
+########################################################################
 class MonsterTypes(Enum):
     person = 0
     zombie = 1
@@ -11,9 +20,16 @@ class MonsterTypes(Enum):
     ghoul = 3
     werewolf = 4
 
-
+########################################################################
+# This is a factory class which generates monsters according to the
+# type passed in. It also defines the actions a monster may perform.
+########################################################################
 class Mob(Observable):
 
+    ####################################################################
+    # Factory method. Generates a monster of the appropriate type
+    # @ return A monster object.
+    ####################################################################
     def factory(type):
         if type == "person": return Person()
         if type == "zombie": return Zombie()
@@ -23,9 +39,23 @@ class Mob(Observable):
         assert 0, "Invalid type: " + type
     factory = staticmethod(factory)
 
+    ####################################################################
+    # Attack method. Returns the monster's attack power.
+    # @ return attackPower the monster's attack power.
+    ####################################################################
     def attack(self):
         return self.attackPower
 
+    ####################################################################
+    # Defend method. Takes an attack dictionary from the player.
+    # Computes the damage dealt to the monster, taking into account
+    # the monster's resistances and weaknesses, and adjust's the
+    # monster's health accordingly. If the monster dies it notifies the
+    # house in which it resides.
+    # @ return damage The damage done to the monster. Returned to the
+    # GUI
+    # @Return dead Whether the monster died. Returned to the GUI
+    ####################################################################
     def defend(self, attackData):
         dead = False
         if self.type == "person":
@@ -49,7 +79,9 @@ class Mob(Observable):
             dead = True
         return {"damage": damage, "dead": dead}
 
-
+####################################################################
+# Child Classes of Mob. They set the fields for each monster type
+####################################################################
 class Person(Mob):
     def __init__(self):
         super().__init__()
