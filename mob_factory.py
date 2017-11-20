@@ -27,13 +27,14 @@ class Mob(Observable):
         return self.attackPower
 
     def defend(self, attackData):
+        dead = False
         if self.type == "person":
-            return
-        if attackData["weaponType"] == self.immunity[0]:
-            return
-        if len(self.immunity) == 2 and attackData["weaponType"] == self.immunity[1]:
-            return
-        if attackData["weaponType"] == self.weakness:
+            damage = 0
+        elif attackData["weaponType"] == self.immunity[0]:
+            damage = 0
+        elif len(self.immunity) == 2 and attackData["weaponType"] == self.immunity[1]:
+            damage = 0
+        elif attackData["weaponType"] == self.weakness:
             if self.type == "zombie":
                 damage = 2 * attackData["playerModifiedAttackPower"]
             if self.type == "zombie":
@@ -45,6 +46,8 @@ class Mob(Observable):
 
         if self.health <= 0:
             super().update(self)
+            dead = True
+        return {"damage": damage, "dead": dead}
 
 
 class Person(Mob):
@@ -52,7 +55,7 @@ class Person(Mob):
         super().__init__()
         self.type = "person"
         self.health = 100
-        self.attackPower = -1
+        self.attackPower = -10
         self.weakness = "none"
         self.immunity = ["none"]
 
@@ -74,7 +77,7 @@ class Vampire(Mob):
         self.type = "vampire"
         random.seed()
         self.health = random.randrange(100,201)
-        self.attackPower = random.randrange(10,21)
+        self.attackPower = random.randrange(10,16)
         self.weakness = "none"
         self.immunity = ["ChocolateBar"]
 
@@ -85,7 +88,7 @@ class Ghoul(Mob):
         self.type = "ghoul"
         random.seed()
         self.health = random.randrange(40,81)
-        self.attackPower = random.randrange(15,31)
+        self.attackPower = random.randrange(15,22)
         self.weakness = "NerdBombs"
         self.immunity = ["none"]
 

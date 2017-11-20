@@ -13,60 +13,199 @@ class Game:
         self.green = (0, 255, 0)
         self.white = (255, 255, 255)
         self.black = (0, 0, 0)
+        self.lightblue = (135, 206, 250)
 
         pygame.init()
         pygame.display.set_caption('Zork')
         self.spriteStore = {}
         self.gameDisplay = pygame.display.set_mode((self.windowWidth, self.windowHeight))
         self.clock = pygame.time.Clock()
+        #Assets
         self.bg = self.getImage('assets/background.png')
         self.font = pygame.font.SysFont(None, 25)
         self.pdown = [self.getImage('assets/wd1.png'), self.getImage('assets/wd2.png')]
         self.pup = [self.getImage('assets/wu1.png'), self.getImage('assets/wu2.png')]
         self.pleft = [self.getImage('assets/wl1.png'), self.getImage('assets/wl2.png')]
         self.pright = [self.getImage('assets/wr1.png'), self.getImage('assets/wr2.png')]
+        self.werewolf = self.getImage('assets/werewolf.png')
+        self.zombie = self.getImage('assets/zombie.png')
+        self.ghoul = self.getImage('assets/ghoul.png')
+        self.vampire = self.getImage('assets/vampire.png')
+        self.person = self.getImage('assets/person.png')
+        self.battleBG = self.getImage('assets/battleBG.png')
 
 
+        self.townGrid = [[[320, 225], [640, 225], [960, 225], [1280, 225], [1600, 225]],
+                         [[320, 450], [640, 450], [960, 450], [1280, 450], [1600, 450]],
+                         [[320, 675], [640, 675], [960, 675], [1280, 675], [1600, 675]],
+                         [[320, 900], [640, 900], [960, 900], [1280, 900], [1600, 900]],
+                         ]
 
+        self.colLen = 320
+        self.rowLen = 225
+        self.playerGridRow = 0
+        self.playerGridCol = 0
+        self.currentHouse = self.world.neighborhood.homes[self.playerGridRow][self.playerGridCol]
+
+        self.gameOver = False
 
     # game loop structure adapted from a video series: https://youtu.be/PzG-fnci8uE
     def run(self):
         gameExit = False
-        gameOver = False
-        FPS = 30
-        playerX = 800
-        playerY = 450
-
+        FPS = 13
+        playerX = 200
+        playerY = 100
+        playerDirection = "s"
+        playerXChange = 0
+        playerYChange = 0
+        counter = 0
+        held = False
+        movementRate = 37
+        onWorldMap = True
+        inBattle = False
+        player = self.getImage("assets/wd2.png")
+        battleRoundOngoing = False
 
         while not gameExit:
+            self.clock.tick(FPS)
 
-            while gameOver:
-                pass
+            while self.gameOver:
+                self.gameDisplay.fill(self.black)
+                self.printToScreen("Game Over", self.red, 800, 300)
+                self.printToScreen("Play again?:   [Y]   [N]", self.red, 800, 400)
+                pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_y:
+                            self.world = World()
+                            onWorldMap = True
+                            inBattle = False
+                            self.gameOver = False
+                            self.run()
+                        if event.key == pygame.K_n:
+                            pygame.quit()
+                            quit()
 
-            # Handle user input
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    gameExit = True
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.K_w:
-                        playerX = 10
-                    if event.type == pygame.K_a:
+            if onWorldMap:
+                pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        gameExit = True
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_w:
+                            playerDirection = "n"
+                            held = True
+                            playerYChange = -movementRate
+                        if event.key == pygame.K_a:
+                            playerDirection = "w"
+                            held = True
+                            playerXChange = -movementRate
 
-                    if event.type == pygame.K_s:
+                        if event.key == pygame.K_s:
+                            playerDirection = "s"
+                            held = True
+                            playerYChange = movementRate
 
-                    if event.type == pygame.K_d:
+                        if event.key == pygame.K_d:
+                            playerDirection = "e"
+                            held = True
+                            playerXChange = movementRate
 
-                    if event.type == pygame.K_RETURN:
+                        if event.key == pygame.K_RETURN:
+                            if self.currentHouse.numBaddies > 0:
+                                onWorldMap = False
+                                inBattle = True
+                                continue
+                    if event.type == pygame.KEYUP:
+                        if event.key == pygame.K_w or event.key == pygame.K_s:
+                            playerYChange = 0
+                            held = False
+                        if event.key == pygame.K_a or event.key == pygame.K_d:
+                            playerXChange = 0
+                            held = False
 
-            self.gameDisplay.blit(self.bg, (0, 0))
+                playerX += playerXChange
+                playerY += playerYChange
 
-            self.printNumMonsters()
-            pygame.display.update()
+                if playerDirection == "s" and held == True:
+                    counter = (counter + 1) % 2
+                    player = self.pdown[counter]
+                elif playerDirection == "w" and held == True:
+                    counter = (counter + 1) % 2
+                    player = self.pleft[counter]
+                elif playerDirection == "e" and held == True:
+                    counter = (counter + 1) % 2
+                    player = self.pright[counter]
+                elif playerDirection == "n" and held == True:
+                    counter = (counter + 1) % 2
+                    player = self.pup[counter]
 
-        self.clock.tick(FPS)
+                self.updateLoc(playerDirection, playerX, playerY)
+                self.currentHouse = self.world.neighborhood.homes[self.playerGridRow][self.playerGridCol]
 
+                self.gameDisplay.blit(self.bg, (0, 0))
+                self.gameDisplay.blit(player, (playerX, playerY))
+
+                self.printNumMonsters()
+                self.printHomeInfo(playerX, playerY)
+                self.printToScreen("Press [ENTER] to enter a home", self.red, 750, 0)
+
+                pygame.display.update()
+
+            #Battle Screen
+            if inBattle:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        gameExit = True
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_0:
+                            self.battleRound(self.world.player.inventory[0])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_1 and len(self.world.player.inventory) >= 2:
+                            self.battleRound(self.world.player.inventory[1])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_2 and len(self.world.player.inventory) >= 3:
+                            self.battleRound(self.world.player.inventory[2])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_3 and len(self.world.player.inventory) >= 4:
+                            self.battleRound(self.world.player.inventory[3])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_4 and len(self.world.player.inventory) >= 5:
+                            self.battleRound(self.world.player.inventory[4])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_5 and len(self.world.player.inventory) >= 6:
+                            self.battleRound(self.world.player.inventory[5])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_6 and len(self.world.player.inventory) >= 7:
+                            self.battleRound(self.world.player.inventory[6])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_7 and len(self.world.player.inventory) >= 8:
+                            self.battleRound(self.world.player.inventory[7])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_8 and len(self.world.player.inventory) >= 9:
+                            self.battleRound(self.world.player.inventory[8])
+                            battleRoundOngoing == True
+                        if event.key == pygame.K_9 and len(self.world.player.inventory) == 10:
+                            self.battleRound(self.world.player.inventory[9])
+                            battleRoundOngoing == True
+
+
+                self.gameDisplay.fill(self.black)
+                self.gameDisplay.blit(self.battleBG, (0, 200))
+                self.gameDisplay.fill(self.white, rect=[650, 700, 10, 250])
+                self.gameDisplay.fill(self.white, rect=[650, 700, 250, 10])
+                self.gameDisplay.fill(self.white, rect=[900, 700, 10, 250])
+                self.gameDisplay.fill(self.lightblue, rect=[660, 710, 240, 240])
+                self.printToScreen("Mike", self.white, 680, 730)
+                self.printToScreen("HP: " + repr(self.world.player.health), self.white, 680, 790)
+                self.showMonsters()
+                self.printItems()
+
+                self.clock.tick(5)
+                pygame.display.update()
 
     pygame.quit()
+
 
     # adapted from https://youtu.be/PzG-fnci8uE
     def printToScreen(self, msg, color, x, y):
@@ -80,9 +219,153 @@ class Game:
 
     # from https://stackoverflow.com/questions/17615447/pre-loading-images-pygame
     def getImage(self, key):
-        if not key in self.spriteStore:
+        if key not in self.spriteStore:
             self.spriteStore[key] = pygame.image.load(key)
         return self.spriteStore[key]
+
+    def updateLoc(self, playerDirection, playerX, playerY):
+        if playerDirection == "e" or playerDirection == "w":
+            if  playerX > 0 and playerX < self.colLen:
+                self.playerGridCol = 0
+            elif playerX > self.colLen and playerX < self.colLen * 2:
+                self.playerGridCol = 1
+            elif playerX > self.colLen*2 and playerX < self.colLen * 3:
+                self.playerGridCol = 2
+            elif playerX > self.colLen*3 and playerX < self.colLen * 4:
+                self.playerGridCol = 3
+            elif playerX > self.colLen*4 and playerX < self.colLen * 5:
+                self.playerGridCol = 4
+
+
+        elif playerDirection == "n" or playerDirection == "s":
+            if  playerY > 0 and playerY < self.rowLen:
+                self.playerGridRow = 0
+            elif playerY > self.rowLen and playerY < self.rowLen * 2:
+                self.playerGridRow = 1
+            elif playerY > self.rowLen*2 and playerY < self.rowLen * 3:
+                self.playerGridRow = 2
+            elif playerY > self.rowLen*3 and playerY < self.rowLen * 4:
+                self.playerGridRow = 3
+
+    def printHomeInfo(self, playerX, playerY):
+        msg = ""
+        color = (0, 0, 0)
+        home = self.world.neighborhood.homes[self.playerGridRow][self.playerGridCol]
+        numMonsters = home.numBaddies
+        if numMonsters == 0:
+            msg = "House Clear!"
+            color = self.green
+        else:
+            msg = repr(numMonsters) + " monsters infest this house"
+            color = self.red
+        x = playerX - 50
+        y = playerY - 50
+        self.printToScreen(msg, color, x, y)
+
+    def showMonsters(self):
+        monsters = self.currentHouse.monsters
+        monsterSpacing = 120
+        monsterX = 0
+        monsterY = 400
+
+        for monster in monsters:
+            if monster.type == "zombie":
+                self.gameDisplay.blit(self.zombie, (monsterX, monsterY))
+            elif monster.type == "ghoul":
+                self.gameDisplay.blit(self.ghoul, (monsterX, monsterY))
+            elif monster.type == "vampire":
+                self.gameDisplay.blit(self.vampire, (monsterX, monsterY))
+            elif monster.type == "werewolf":
+                self.gameDisplay.blit(self.werewolf, (monsterX, monsterY))
+            elif monster.type == "person":
+                self.gameDisplay.blit(self.person, (monsterX, monsterY))
+            monsterX += monsterSpacing
+
+    def printItems(self):
+        x = 20
+        y = 20
+        xSpacing = 250
+        ySpacing = 30
+        itemNo = 0
+
+        items = self.world.player.inventory
+
+        for item in items:
+            self.printToScreen("[" + repr(itemNo) + "] to use: " + item.type + " x " + repr(item.uses), self.white, x, y)
+            x += xSpacing
+            itemNo += 1
+            if x > 800:
+                x = 20
+                y += ySpacing
+
+
+    def battleRound(self, weapon):
+        displayBattleText = True
+        battleText = []
+        battleTextIndex = 0
+        battleWon = False
+        self.gameDisplay.fill(self.black)
+        self.gameDisplay.blit(self.battleBG, (0, 200))
+        self.gameDisplay.fill(self.white, rect=[650, 700, 10, 250])
+        self.gameDisplay.fill(self.white, rect=[650, 700, 250, 10])
+        self.gameDisplay.fill(self.white, rect=[900, 700, 10, 250])
+        self.gameDisplay.fill(self.lightblue, rect=[660, 710, 240, 240])
+        self.printToScreen("Mike", self.white, 680, 730)
+        self.printToScreen("HP: " + repr(self.world.player.health), self.white, 680, 790)
+        self.printToScreen("You used: " + weapon.type, self.green, 20, 20)
+        self.showMonsters()
+
+        monsters = self.currentHouse.monsters
+        player = self.world.player
+
+        for monster in monsters:
+            name = monster.type
+            info = monster.defend(player.attack(weapon))
+
+            battleText.append(repr(info["damage"]) + "HP damage to " + name)
+            if info['dead']:
+                battleText.append(name + " was defeated")
+        for monster in monsters:
+            player.defend(monster.attack())
+            battleText.append(monster.type + " attacked for " + repr(monster.attackPower) + " HP damage!")
+        if player.health <= 0:
+            battleText.append("You were defeated!!")
+        if self.currentHouse.numBaddies == 0:
+            battleText.append("YOU WON!")
+            battleWon = True
+
+        pygame.display.update()
+        while displayBattleText:
+            self.gameDisplay.fill(self.black)
+            self.gameDisplay.blit(self.battleBG, (0, 200))
+            self.gameDisplay.fill(self.white, rect=[650, 700, 10, 250])
+            self.gameDisplay.fill(self.white, rect=[650, 700, 250, 10])
+            self.gameDisplay.fill(self.white, rect=[900, 700, 10, 250])
+            self.gameDisplay.fill(self.lightblue, rect=[660, 710, 240, 240])
+            self.printToScreen("Mike", self.white, 680, 730)
+            self.printToScreen("HP: " + repr(self.world.player.health), self.white, 680, 790)
+            self.showMonsters()
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        if battleTextIndex < len(battleText):
+                            self.printToScreen(battleText[battleTextIndex], self.white, 20, 20)
+                            battleTextIndex += 1
+                            pygame.display.update()
+                        elif player.health <= 0:
+                            self.gameOver = True
+                            inBattle = False
+                            self.run()
+                        else:
+                            displayBattleText = False
+        if battleWon:
+            self.inBattle = False
+            self.onWorldMap = True
+            pygame.display.update()
+            self.run()
+
 
 class Driver:
     if __name__ == '__main__':

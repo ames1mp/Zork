@@ -30,36 +30,3 @@ class Home(Observable, Observer):
         self.monsters.append(Mob.factory("person"))
         super().update(self)
 
-
-
-# class Driver:
-#
-#     if __name__ == '__main__':
-#
-#         attackData = {"playerBaseAttackPower": 10,
-#                       "playerModifiedAttackPower": 25,
-#                       "weaponType": "hersheykiss"}
-#
-#         home = Home()
-#         print("Num Monsters: " + repr(len(home.monsters)))
-#         print("Monster 0  is " + home.monsters[0].type)
-#         print("Monster 0 has HP: " + repr(home.monsters[0].health))
-#         home.monsters[0].defend(attackData)
-#         print("Num Monsters: " + repr(len(home.monsters)))
-#         print("Monster 0 has HP: " + repr(home.monsters[0].health))
-#         home.monsters[0].defend(attackData)
-#         print("Num Monsters: " + repr(len(home.monsters)))
-#         print("Monster 0 has HP: " + repr(home.monsters[0].health))
-#         home.monsters[0].defend(attackData)
-#         print("Num Monsters: " + repr(len(home.monsters)))
-#         print("Monster 0 has HP: " + repr(home.monsters[0].health))
-#         home.monsters[0].defend(attackData)
-#         print("Num Monsters: " + repr(len(home.monsters)))
-#         print("Monster 0 has HP: " + repr(home.monsters[0].health))
-#         home.monsters[0].defend(attackData)
-#         print("Num Monsters: " + repr(len(home.monsters)))
-#         print("Monster 0 has HP: " + repr(home.monsters[0].health))
-#         home.monsters[0].defend(attackData)
-#         print("Num Monsters: " + repr(len(home.monsters)))
-#         print("Monster 0 has HP: " + repr(home.monsters[0].health))
-

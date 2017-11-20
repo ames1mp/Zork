@@ -4,12 +4,12 @@ import random
 
 
 class Weapon(object):
-    def factory(monsterType):
-        if monsterType == "hersheykiss": return HersheyKiss()
-        if monsterType == "sourstraw": return SourStraw()
-        if monsterType == "chocolatebar": return ChocolateBar()
-        if monsterType == "nerdbomb": return NerdBomb()
-        assert 0, "Invalid type: " + monsterType
+    def factory(weaponType):
+        if weaponType == "hersheykiss": return HersheyKiss()
+        if weaponType == "sourstraw": return SourStraw()
+        if weaponType == "chocolatebar": return ChocolateBar()
+        if weaponType == "nerdbomb": return NerdBomb()
+        assert 0, "Invalid type: " + weaponType
     factory = staticmethod(factory)
 
 
